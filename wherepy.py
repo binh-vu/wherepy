@@ -54,6 +54,7 @@ def find_pythons(
     minimum_version: Optional[str] = None,
     interpreter_type: InterpreterType = InterpreterType.cpython,
     delimiter: str = ":",
+    return_execpath: bool = False,
     error_if_not_found: bool = False,
 ):
     """
@@ -67,6 +68,7 @@ def find_pythons(
         minimum_version: Minimum Python version to return.
         interpreter_type: Interpreter type to filter the results. Can be 'cpython', 'pypy', or 'all'.
         delimiter: Delimiter used to separate Python home paths in the output.
+        return_execpath: If True, return the executable path instead of the home directory.
         error_if_not_found: Raise an error if no Python home is found.
     """
     if python_home is None and python_homes is None and search_dir is None:
@@ -144,7 +146,10 @@ def find_pythons(
         print("No Python home found")
         exit(1)
 
-    print(delimiter.join(str(path) for path in homes))
+    if return_execpath:
+        print(delimiter.join(str(get_python(home)) for home in homes))
+    else:
+        print(delimiter.join(str(path) for path in homes))
     exit(0)
 
 
@@ -191,6 +196,11 @@ def main():
         help="Delimiter used to separate Python home paths in the output",
     )
     parser.add_argument(
+        "--return-execpath",
+        action="store_true",
+        help="If set, return the executable path instead of the home directory",
+    )
+    parser.add_argument(
         "--error-if-not-found",
         action="store_true",
         help="Raise an error if no Python home is found",
@@ -205,6 +215,7 @@ def main():
         minimum_version=args.minimum_version,
         interpreter_type=InterpreterType(args.interpreter_type),
         delimiter=args.delimiter,
+        return_execpath=args.return_execpath,
         error_if_not_found=args.error_if_not_found,
     )
 
