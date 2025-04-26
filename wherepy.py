@@ -56,6 +56,7 @@ def find_pythons(
     search_dir: Annotated[
         Optional[Path],
         typer.Option(
+            "--search-dir",
             help="Directory to search for Python homes. This has precedence over --python-home and --python-homes",
             exists=True,
             file_okay=False,
