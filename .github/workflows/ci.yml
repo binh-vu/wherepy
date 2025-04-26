@@ -24,4 +24,5 @@ jobs:
           pip install typer
       - name: run wherepy
         run: |
+          python wherepy.py --help
           python wherepy.py --search-dir ${{ runner.tool_cache }}/Python --error-if-not-found
