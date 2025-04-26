@@ -53,6 +53,7 @@ def find_pythons(
     python_versions: Optional[str] = None,
     minimum_version: Optional[str] = None,
     interpreter_type: InterpreterType = InterpreterType.cpython,
+    delimiter: str = ":",
     error_if_not_found: bool = False,
 ):
     """
@@ -65,6 +66,7 @@ def find_pythons(
         python_versions: Comma-separated list of Python versions to filter the results.
         minimum_version: Minimum Python version to return.
         interpreter_type: Interpreter type to filter the results. Can be 'cpython', 'pypy', or 'all'.
+        delimiter: Delimiter used to separate Python home paths in the output.
         error_if_not_found: Raise an error if no Python home is found.
     """
     if python_home is None and python_homes is None and search_dir is None:
@@ -183,6 +185,12 @@ def main():
         help="Interpreter type to filter the results. Can be 'cpython', 'pypy', or 'all'",
     )
     parser.add_argument(
+        "--delimiter",
+        type=str,
+        default=":",
+        help="Delimiter used to separate Python home paths in the output",
+    )
+    parser.add_argument(
         "--error-if-not-found",
         action="store_true",
         help="Raise an error if no Python home is found",
@@ -196,6 +204,7 @@ def main():
         python_versions=args.python_versions,
         minimum_version=args.minimum_version,
         interpreter_type=InterpreterType(args.interpreter_type),
+        delimiter=args.delimiter,
         error_if_not_found=args.error_if_not_found,
     )
 
