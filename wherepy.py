@@ -6,7 +6,7 @@ import subprocess
 from enum import Enum
 from math import e
 from pathlib import Path
-from typing import Annotated, Literal, Tuple, Union
+from typing import Annotated, Literal, Optional, Tuple, Union
 
 import typer
 
@@ -54,7 +54,7 @@ app = typer.Typer(pretty_exceptions_short=True, pretty_exceptions_enable=False)
 @app.command()
 def find_pythons(
     search_dir: Annotated[
-        Path | None,
+        Optional[Path],
         typer.Option(
             help="Directory to search for Python homes. This has precedence over --python-home and --python-homes",
             exists=True,
@@ -62,25 +62,25 @@ def find_pythons(
         ),
     ],
     python_home: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(
             help="Specific Python home directory to search. This has precedence over --python-homes",
         ),
     ] = None,
     python_homes: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(
             help="Colon-separated list of directories to search for Python homes"
         ),
     ] = None,
     python_versions: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(
             help="Comma-separated list of Python versions to filter the results",
         ),
     ] = None,
     minimum_version: Annotated[
-        str | None,
+        Optional[str],
         typer.Option(help="Minimum Python version to return"),
     ] = None,
     interpreter_type: Annotated[
