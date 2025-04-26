@@ -3,11 +3,20 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from enum import Enum
 from math import e
 from pathlib import Path
 from typing import Annotated, Literal, Tuple, Union
 
 import typer
+
+
+class InterpreterType(str, Enum):
+    """Enum for interpreter types."""
+
+    cpython = "cpython"
+    pypy = "pypy"
+    all = "all"
 
 
 def is_python_home(dir: Union[str, Path]):
@@ -27,14 +36,16 @@ def get_python(home: Union[str, Path]) -> str:
     raise ValueError("python not found in {}".format(home))
 
 
-def get_python_version(home: Union[str, Path]) -> Tuple[str, str]:
+def get_python_version(home: Union[str, Path]) -> Tuple[str, InterpreterType]:
     """Get python's version and whether it is cpython or pypy."""
     output = subprocess.check_output([get_python(home), "-V"]).decode().strip()
-    m = re.match("Python ([\d\.)]+)", output)
+    m = re.match(r"Python ([\d\.)]+)", output)
     assert m is not None
     version = m.group(1)
-    type = "pypy" if output.find("PyPy") != -1 else "cpython"
-    return version, type
+    pytype = (
+        InterpreterType.pypy if output.find("PyPy") != -1 else InterpreterType.cpython
+    )
+    return version, pytype
 
 
 app = typer.Typer(pretty_exceptions_short=True, pretty_exceptions_enable=False)
@@ -73,11 +84,11 @@ def find_pythons(
         typer.Option(help="Minimum Python version to return"),
     ] = None,
     interpreter_type: Annotated[
-        Literal["cpython", "pypy", "all"],
+        InterpreterType,
         typer.Option(
             help="Interpreter type to filter the results. Can be 'cpython', 'pypy', or 'all'",
         ),
-    ] = "cpython",
+    ] = InterpreterType.cpython,
     error_if_not_found: Annotated[
         bool,
         typer.Option(
@@ -98,12 +109,12 @@ def find_pythons(
         for pyexec in search_dir.glob("**/bin/python*"):
             home = pyexec.parent.parent
             assert is_python_home(home)
-            version, type = get_python_version(home)[0]
-            if interpreter_type == "all" or type == interpreter_type:
+            version, type = get_python_version(home)
+            if interpreter_type == InterpreterType.all or type == interpreter_type:
                 homes[home] = version
     elif python_home is not None:
         version, type = get_python_version(python_home)
-        if interpreter_type == "all" or type == interpreter_type:
+        if interpreter_type == InterpreterType.all or type == interpreter_type:
             homes[python_home] = version
     else:
         assert python_homes is not None
@@ -112,7 +123,7 @@ def find_pythons(
             if is_python_home(path):
                 # is the python directory
                 version, type = get_python_version(path)
-                if interpreter_type == "all" or type == interpreter_type:
+                if interpreter_type == InterpreterType.all or type == interpreter_type:
                     homes[path] = version
             else:
                 subhomes = {}
@@ -122,7 +133,10 @@ def find_pythons(
                         continue
 
                     version, pytype = get_python_version(home)
-                    if interpreter_type != "all" and pytype != interpreter_type:
+                    if (
+                        interpreter_type != InterpreterType.all
+                        and pytype != interpreter_type
+                    ):
                         continue
 
                     # do not keep different patches (only keep major.minor)
@@ -160,7 +174,7 @@ def find_pythons(
         print("No Python home found")
         exit(1)
 
-    print(":".join(homes))
+    print(":".join(str(path) for path in homes))
     exit(0)
 
 
