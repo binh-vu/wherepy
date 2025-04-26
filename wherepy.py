@@ -54,7 +54,7 @@ app = typer.Typer(pretty_exceptions_short=True, pretty_exceptions_enable=False)
 @app.command()
 def find_pythons(
     search_dir: Annotated[
-        Optional[Path],
+        Optional[str],
         typer.Option(
             "--search-dir",
             help="Directory to search for Python homes. This has precedence over --python-home and --python-homes",
@@ -105,7 +105,7 @@ def find_pythons(
 
     homes = {}
     if search_dir is not None:
-        for pyexec in search_dir.glob("**/bin/python*"):
+        for pyexec in Path(search_dir).glob("**/bin/python*"):
             home = pyexec.parent.parent
             assert is_python_home(home)
             version, type = get_python_version(home)
