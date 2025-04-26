@@ -162,3 +162,7 @@ def find_pythons(
 
     print(":".join(homes))
     exit(0)
+
+
+if __name__ == "__main__":
+    app()
