@@ -144,7 +144,7 @@ def find_pythons(
         print("No Python home found")
         exit(1)
 
-    print(":".join(str(path) for path in homes))
+    print(delimiter.join(str(path) for path in homes))
     exit(0)
 
 
