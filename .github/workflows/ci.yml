@@ -21,4 +21,5 @@ jobs:
         run: |
           which python
           echo ${{ runner.tool_cache }}/Python
+          pip install typer
           python -m wherepy --search-dir ${{ runner.tool_cache }}/Python
