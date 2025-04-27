@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wherepy"
-version = "1.2.0"
+version = "1.2.1"
 description = "Find Python(s) in your system"
 authors = ["Binh Vu <bvu687@gmail.com>"]
 license = "MIT"

@@ -5,6 +5,8 @@ import os
 import re
 import subprocess
 from enum import Enum
+from glob import glob
+from itertools import chain
 from pathlib import Path
 from typing import Optional, Tuple, Union
 
@@ -36,9 +38,13 @@ def get_python(home: Union[str, Path]) -> str:
 
 def get_python_version(home: Union[str, Path]) -> Tuple[str, InterpreterType]:
     """Get python's version and whether it is cpython or pypy."""
-    output = subprocess.check_output([get_python(home), "-V"]).decode().strip()
-    m = re.match(r"Python ([\d\.)]+)", output)
-    assert m is not None
+    output = (
+        subprocess.check_output([get_python(home), "-V"], stderr=subprocess.STDOUT)
+        .decode()
+        .strip()
+    )
+    m = re.search(r"Python ([\d\.)]+)", output)
+    assert m is not None, output
     version = m.group(1)
     pytype = (
         InterpreterType.pypy if output.find("PyPy") != -1 else InterpreterType.cpython
@@ -78,9 +84,16 @@ def find_pythons(
 
     homes = {}
     if search_dir is not None:
-        for pyexec in Path(search_dir).glob("**/bin/python*"):
-            home = pyexec.parent.parent
-            assert is_python_home(home)
+        path_search_dir = Path(search_dir)
+        for home in {
+            pyexec.parent.parent
+            for pyexec in chain(
+                path_search_dir.glob("**/bin/python*"),
+                path_search_dir.glob("*/bin/python*"),
+            )
+        }:
+            if not is_python_home(home):
+                continue
             version, type = get_python_version(home)
             if interpreter_type == InterpreterType.all or type == interpreter_type:
                 homes[home] = version
